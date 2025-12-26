@@ -1,0 +1,50 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}完善个人信息 - 门诊管理系统{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">完善患者信息</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">姓名 <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" value="{{ patient.name|default:'' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">性别 <span class="text-danger">*</span></label>
+                            <select name="gender" class="form-select" required>
+                                <option value="" {% if not patient %}selected{% endif %}>请选择</option>
+                                <option value="男" {% if patient and patient.gender == '男' %}selected{% endif %}>男</option>
+                                <option value="女" {% if patient and patient.gender == '女' %}selected{% endif %}>女</option>
+                                <option value="其他" {% if patient and patient.gender == '其他' %}selected{% endif %}>其他</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">身份证号 <span class="text-danger">*</span></label>
+                            <input type="text" name="id_card" class="form-control" value="{{ patient.id_card|default:'' }}" maxlength="18" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">联系电话 <span class="text-danger">*</span></label>
+                            <input type="tel" name="mobile" class="form-control" value="{{ patient.mobile|default:'' }}" maxlength="11" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">出生日期 <span class="text-danger">*</span></label>
+                        <input type="date" name="birth_date" class="form-control" value="{{ patient.birth_date|date:'Y-m-d'|default:'' }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">保存信息</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

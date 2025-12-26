@@ -1,0 +1,48 @@
+/* 全局样式 */
+body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* 卡片样式优化 */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-bottom: none;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+/* 按钮样式优化 */
+.btn {
+    border-radius: 0.375rem;
+}
+
+/* 表格样式优化 */
+.table {
+    --bs-table-border-color: #e9ecef;
+}
+
+.table th {
+    font-weight: 600;
+}
+
+/* 表单样式优化 */
+.form-control, .form-select {
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+/* 徽章样式优化 */
+.badge {
+    font-size: 0.875em;
+    padding: 0.5em 0.75em;
+}

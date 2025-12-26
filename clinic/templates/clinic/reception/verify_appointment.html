@@ -1,0 +1,26 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}预约核验 - 门诊管理系统{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">预约核验</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">预约ID <span class="text-danger">*</span></label>
+                        <input type="number" name="appt_id" class="form-control" placeholder="请输入患者预约ID" required>
+                        <div class="form-text">患者预约成功后会生成唯一的预约ID，请向患者确认</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">核验并生成就诊记录</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

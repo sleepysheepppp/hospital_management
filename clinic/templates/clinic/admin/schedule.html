@@ -1,0 +1,96 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}医生排班 - 门诊管理系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 新增排班 -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">新增排班</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">医生 <span class="text-danger">*</span></label>
+                        {{ form.doctor|add_class:"form-select" }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">诊室 <span class="text-danger">*</span></label>
+                        {{ form.room|add_class:"form-select" }}
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">排班日期 <span class="text-danger">*</span></label>
+                            {{ form.schedule_date|add_class:"form-control" }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">接诊时间段 <span class="text-danger">*</span></label>
+                            <input type="text" name="time_slot" class="form-control" placeholder="如：08:00-12:00" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">排班状态</label>
+                        {{ form.status|add_class:"form-select" }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">保存排班</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 排班列表 -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0 text-secondary">排班列表</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>排班ID</th>
+                                <th>医生</th>
+                                <th>诊室</th>
+                                <th>排班日期</th>
+                                <th>时间段</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in schedules %}
+                            <tr>
+                                <td>{{ schedule.schedule_id }}</td>
+                                <td>{{ schedule.doctor.name }}</td>
+                                <td>{{ schedule.room }}</td>
+                                <td>{{ schedule.schedule_date|date:"Y-m-d" }}</td>
+                                <td>{{ schedule.time_slot }}</td>
+                                <td>
+                                    {% if schedule.status == 1 %}
+                                    <span class="badge bg-success">可接诊</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">不可接诊</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">编辑</button>
+                                    <button class="btn btn-sm btn-outline-danger">删除</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-3">暂无排班记录</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

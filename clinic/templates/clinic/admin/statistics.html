@@ -1,0 +1,101 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}数据统计 - 门诊管理系统{% endblock %}
+
+{% block content %}
+<!-- 按科室统计就诊人次 -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">按科室统计就诊人次</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>科室名称</th>
+                        <th>就诊人次</th>
+                        <th>占比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in dept_visits %}
+                    <tr>
+                        <td>{{ item.doctor__dept__dept_name|default:"未分配科室" }}</td>
+                        <td>{{ item.count }}</td>
+                        <td>
+                            {% if total_visits > 0 %}
+                                {# 用Django内置widthratio计算占比（无需自定义过滤器） #}
+                                {% widthratio item.count total_visits 100 as percent %}
+                                {% with width_value=percent|add:"%" %}
+                                <div class="progress" style="height: 20px;">
+                                    {# 纯变量+单位，编辑器不再误判 #}
+                                    <div class="progress-bar bg-primary"
+                                         role="progressbar"
+                                         style="width: {{ width_value }};"
+                                         aria-valuenow="{{ item.count }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="{{ total_visits }}">
+                                        {{ percent }}%
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-secondary"
+                                         role="progressbar"
+                                         style="width: 0%;"
+                                         aria-valuenow="0"
+                                         aria-valuemin="0"
+                                         aria-valuemax="0">
+                                        0%
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-3">暂无科室就诊数据</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 按医生统计收入 -->
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">按医生统计缴费金额</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>医生姓名</th>
+                        <th>总缴费金额（元）</th>
+                        <th>医保金额（元）</th>
+                        <th>自费金额（元）</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in doctor_payments %}
+                    <tr>
+                        <td>{{ item.record__doctor__name|default:"未知医生" }}</td>
+                        <td>{{ item.total|default:0|floatformat:2 }}</td>
+                        <td>{{ item.medical_insurance__sum|default:0|floatformat:2 }}</td>
+                        <td>{{ item.self_pay__sum|default:0|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">暂无医生缴费数据</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}我的预约 - 门诊管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">我的预约记录</h5>
+        <a href="{% url 'patient_appointment' %}" class="btn btn-sm btn-light">新增预约</a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>预约ID</th>
+                        <th>预约科室</th>
+                        <th>预约时间</th>
+                        <th>预计到达时间</th>
+                        <th>预约状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td>{{ appt.appt_id }}</td>
+                        <td>{{ appt.dept.dept_name }}</td>
+                        <td>{{ appt.appt_time|date:"Y-m-d H:i" }}</td>
+                        <td>{{ appt.arrival_time|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if appt.status == 0 %}
+                            <span class="badge bg-warning">未就诊</span>
+                            {% elif appt.status == 1 %}
+                            <span class="badge bg-success">已完成</span>
+                            {% else %}
+                            <span class="badge bg-danger">已取消</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if appt.status == 0 %}
+                            <button class="btn btn-sm btn-danger" disabled>取消预约</button>
+                            <div class="form-text">请到医院前台取消</div>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-secondary" disabled>查看详情</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">暂无预约记录</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

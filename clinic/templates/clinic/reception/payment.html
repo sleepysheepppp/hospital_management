@@ -1,0 +1,92 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}缴费结算 - 门诊管理系统{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">缴费结算</h5>
+            </div>
+            <div class="card-body">
+                <!-- 第一步：输入就诊ID -->
+                <div id="step1" class="mb-4">
+                    <form id="searchRecordForm">
+                        <div class="mb-3">
+                            <label class="form-label">就诊ID <span class="text-danger">*</span></label>
+                            <input type="number" name="record_id" id="record_id" class="form-control" placeholder="请输入就诊ID" required>
+                        </div>
+                        <button type="button" id="searchRecordBtn" class="btn btn-primary w-100">查询就诊记录</button>
+                    </form>
+                </div>
+
+                <!-- 第二步：缴费信息填写（默认隐藏） -->
+                <div id="step2" class="d-none">
+                    <hr>
+                    <h6 class="mb-3">就诊信息</h6>
+                    <div id="recordInfo" class="mb-4"></div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="record_id" id="form_record_id">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">总金额（元） <span class="text-danger">*</span></label>
+                                {{ form.total_amount|add_class:"form-control" }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">医保金额（元）</label>
+                                {{ form.medical_insurance|add_class:"form-control" }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">缴费方式 <span class="text-danger">*</span></label>
+                            {{ form.pay_method|add_class:"form-select" }}
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">确认缴费</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 模拟查询就诊记录（实际项目中需对接后端接口）
+document.getElementById('searchRecordBtn').addEventListener('click', function() {
+    const recordId = document.getElementById('record_id').value;
+    if (!recordId) return;
+    
+    // 隐藏step1，显示step2
+    document.getElementById('step1').classList.add('d-none');
+    document.getElementById('step2').classList.remove('d-none');
+    document.getElementById('form_record_id').value = recordId;
+    
+    // 模拟就诊信息（实际需从后端获取）
+    document.getElementById('recordInfo').innerHTML = `
+        <table class="table table-borderless">
+            <tr>
+                <th width="25%">就诊ID：</th>
+                <td>${recordId}</td>
+                <th width="25%">患者姓名：</th>
+                <td>张三</td>
+            </tr>
+            <tr>
+                <th>接诊医生：</th>
+                <td>李四（内科）</td>
+                <th>就诊时间：</th>
+                <td>${new Date().toLocaleString()}</td>
+            </tr>
+            <tr>
+                <th>就诊状态：</th>
+                <td><span class="badge bg-warning">就诊中</span></td>
+                <th>诊室：</th>
+                <td>内科1诊室</td>
+            </tr>
+        </table>
+    `;
+});
+</script>
+{% endblock %}
