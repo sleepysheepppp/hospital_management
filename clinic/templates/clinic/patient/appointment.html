@@ -14,11 +14,11 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">预约科室 <span class="text-danger">*</span></label>
-                        {{ form.dept|add_class:"form-select" }}
+                        {{ form.dept }}  <!-- 直接使用字段，已自带 form-select 类 -->
                     </div>
                     <div class="mb-3">
                         <label class="form-label">预计到达时间 <span class="text-danger">*</span></label>
-                        {{ form.arrival_time|add_class:"form-control" }}
+                        {{ form.arrival_time }} 
                         <div class="form-text">最多可预约未来7天的号源，且不能早于当前时间</div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">提交预约</button>

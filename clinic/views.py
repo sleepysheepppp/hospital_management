@@ -10,7 +10,7 @@ from .models import (
     Department, ClinicRoom, Doctor, Patient,
     Schedule, Appointment, MedicalRecord, Payment
 )
-from .forms import PaymentForm
+from .forms import PaymentForm, AppointmentForm  # 新增导入AppointmentForm
 
 # ==================== 权限装饰器 ====================
 def patient_required(view_func):
@@ -84,8 +84,11 @@ def dashboard(request):
 @login_required
 @patient_required
 def patient_dashboard(request):
-    """患者仪表盘"""
-    return render(request, 'clinic/patient/dashboard.html')
+    # 处理数据查询和切片
+    upcoming_appointments = request.patient.appointment_set.filter(status=0)[:3]  # 在视图中处理
+    return render(request, 'clinic/patient/dashboard.html', {
+        'upcoming_appointments': upcoming_appointments  # 传递给模板
+    })
 
 @login_required
 def patient_profile(request):
@@ -128,36 +131,51 @@ def patient_profile(request):
 @login_required
 @patient_required
 def patient_appointment(request):
-    """患者预约挂号"""
-    depts = Department.objects.all()
-    if request.method == 'POST':
-        dept_id = request.POST.get('dept')
-        arrival_time = request.POST.get('arrival_time')
-        
-        # 检查预约冲突：同一患者同一时间段只能有一个未完成预约
-        conflict = Appointment.objects.filter(
-            patient=request.patient,
-            status=0,
-            arrival_time__date=datetime.strptime(arrival_time, '%Y-%m-%dT%H:%M').date()
-        ).exists()
-        
-        if conflict:
-            return render(request, 'clinic/patient/appointment.html', {
-                'depts': depts,
-                'error': '您当天已有未完成的预约，请先处理后再新增'
-            })
-        
-        # 创建预约
-        Appointment.objects.create(
-            patient=request.patient,
-            dept=get_object_or_404(Department, id=dept_id),
-            appt_time=datetime.now(),
-            arrival_time=datetime.strptime(arrival_time, '%Y-%m-%dT%H:%M'),
-            status=0  # 0=未就诊
-        )
-        return redirect('patient_appointment_list')
+    """患者预约挂号（修复strptime空值问题，整合表单验证）"""
+    form = AppointmentForm(request.POST or None)  # 初始化表单
+    depts = Department.objects.all()  # 保留科室列表，兼容模板
     
-    return render(request, 'clinic/patient/appointment.html', {'depts': depts})
+    if request.method == 'POST':
+        if form.is_valid():  # 先通过表单验证（自动处理空值、时间范围）
+            dept = form.cleaned_data['dept']
+            arrival_time = form.cleaned_data['arrival_time']
+            
+            # 检查预约冲突：同一患者同一时间段只能有一个未完成预约
+            conflict = Appointment.objects.filter(
+                patient=request.patient,
+                status=0,
+                arrival_time__date=arrival_time.date()  # 直接用datetime对象的date()，无需strptime
+            ).exists()
+            
+            if conflict:
+                return render(request, 'clinic/patient/appointment.html', {
+                    'form': form,
+                    'depts': depts,
+                    'error': '您当天已有未完成的预约，请先处理后再新增'
+                })
+            
+            # 创建预约（使用表单验证后的数据）
+            Appointment.objects.create(
+                patient=request.patient,
+                dept=dept,
+                appt_time=datetime.now(),
+                arrival_time=arrival_time,  # 已验证的datetime对象
+                status=0  # 0=未就诊
+            )
+            return redirect('patient_appointment_list')
+        # 表单验证失败，返回错误信息
+        else:
+            return render(request, 'clinic/patient/appointment.html', {
+                'form': form,
+                'depts': depts,
+                'error': '请检查填写的信息是否正确'
+            })
+    
+    # GET请求，展示空表单
+    return render(request, 'clinic/patient/appointment.html', {
+        'form': form,
+        'depts': depts
+    })
 
 @login_required
 @patient_required
@@ -287,6 +305,13 @@ def admin_schedule(request):
         schedule_date = request.POST.get('schedule_date')
         time_slot = request.POST.get('time_slot')
         status = request.POST.get('status')
+        
+        # 空值检查：避免strptime报错
+        if not schedule_date:
+            return render(request, 'clinic/admin/schedule.html', {
+                'schedules': schedules,
+                'error': '请选择排班日期'
+            })
         
         Schedule.objects.create(
             doctor=get_object_or_404(Doctor, id=doctor_id),
