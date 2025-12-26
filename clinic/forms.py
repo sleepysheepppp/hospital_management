@@ -2,6 +2,7 @@ from django import forms
 from .models import Patient, Appointment, Payment, Schedule
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
+from django.utils import timezone  # 新增：引入时区工具
 
 # 患者预约表单
 class AppointmentForm(forms.ModelForm):
@@ -14,27 +15,33 @@ class AppointmentForm(forms.ModelForm):
                 attrs={
                     'type': 'datetime-local',
                     'class': 'form-control',
-                    'required': True  # 前端强制必填
-                }, 
+                    'required': True
+                },
+                # 修复：指定格式为前端兼容的ISO格式
                 format='%Y-%m-%dT%H:%M'
             ),
         }
-    # 给字段添加必填验证（后端兜底）
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['dept'].required = True
-        self.fields['arrival_time'].required = True
 
     def clean_arrival_time(self):
-        arrival_time = self.cleaned_data.get('arrival_time')  # 用get避免KeyError
-        # 先检查是否为空
+        arrival_time = self.cleaned_data.get('arrival_time')
         if not arrival_time:
-            raise ValidationError("请选择预约时间")
-        # 原有验证逻辑
-        if arrival_time < datetime.now():
-            raise ValidationError("预约时间不能早于当前时间")
-        if arrival_time > datetime.now() + timedelta(days=7):
-            raise ValidationError("最多只能预约未来7天的号源")
+            raise ValidationError("请选择预计到达时间")
+        
+        # 修复1：统一转换为本地时区（解决UTC时区导致的时间差）
+        now = timezone.localtime()  # 替换原有的 datetime.now()
+        arrival_time = timezone.localtime(arrival_time)
+        
+        # 修复2：忽略秒级精度（前端只选到分钟，后端可能带秒导致误判）
+        now = now.replace(second=0, microsecond=0)
+        arrival_time = arrival_time.replace(second=0, microsecond=0)
+        
+        # 验证逻辑
+        if arrival_time < now:
+            raise ValidationError(f"预约时间不能早于当前时间（当前时间：{now.strftime('%Y-%m-%d %H:%M')}）")
+        
+        if arrival_time > now + timedelta(days=7):
+            raise ValidationError(f"最多只能预约未来7天的号源（最晚：{(now + timedelta(days=7)).strftime('%Y-%m-%d %H:%M')}）")
+        
         return arrival_time
 
 # 缴费表单

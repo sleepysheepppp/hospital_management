@@ -1,11 +1,13 @@
 {% extends 'clinic/base.html' %}
+<!-- 加载自定义过滤器（解决add_class报错） -->
+{% load custom_filters %}
 
 {% block title %}缴费结算 - 门诊管理系统{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">缴费结算</h5>
             </div>
@@ -34,19 +36,32 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">总金额（元） <span class="text-danger">*</span></label>
+                                <!-- 使用自定义add_class过滤器添加样式 -->
                                 {{ form.total_amount|add_class:"form-control" }}
+                                {% if form.total_amount.errors %}
+                                    <small class="text-danger">{{ form.total_amount.errors.0 }}</small>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">医保金额（元）</label>
                                 {{ form.medical_insurance|add_class:"form-control" }}
+                                {% if form.medical_insurance.errors %}
+                                    <small class="text-danger">{{ form.medical_insurance.errors.0 }}</small>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">缴费方式 <span class="text-danger">*</span></label>
                             {{ form.pay_method|add_class:"form-select" }}
+                            {% if form.pay_method.errors %}
+                                <small class="text-danger">{{ form.pay_method.errors.0 }}</small>
+                            {% endif %}
                         </div>
                         <button type="submit" class="btn btn-success w-100">确认缴费</button>
                     </form>
+                    
+                    <!-- 返回按钮 -->
+                    <button type="button" id="backBtn" class="btn btn-outline-secondary w-100 mt-3">返回重新查询</button>
                 </div>
             </div>
         </div>
@@ -54,17 +69,20 @@
 </div>
 
 <script>
-// 模拟查询就诊记录（实际项目中需对接后端接口）
+// 1. 查询就诊记录逻辑
 document.getElementById('searchRecordBtn').addEventListener('click', function() {
     const recordId = document.getElementById('record_id').value;
-    if (!recordId) return;
+    if (!recordId) {
+        alert('请输入有效的就诊ID！');
+        return;
+    }
     
-    // 隐藏step1，显示step2
+    // 切换步骤显示
     document.getElementById('step1').classList.add('d-none');
     document.getElementById('step2').classList.remove('d-none');
     document.getElementById('form_record_id').value = recordId;
     
-    // 模拟就诊信息（实际需从后端获取）
+    // 模拟就诊信息（实际项目中替换为AJAX请求后端接口）
     document.getElementById('recordInfo').innerHTML = `
         <table class="table table-borderless">
             <tr>
@@ -88,5 +106,23 @@ document.getElementById('searchRecordBtn').addEventListener('click', function() 
         </table>
     `;
 });
+
+// 2. 返回重新查询逻辑
+document.getElementById('backBtn').addEventListener('click', function() {
+    document.getElementById('step2').classList.add('d-none');
+    document.getElementById('step1').classList.remove('d-none');
+    document.getElementById('record_id').value = ''; // 清空输入框
+    document.getElementById('recordInfo').innerHTML = ''; // 清空就诊信息
+});
+
+// 3. 自动隐藏提示消息（如缴费成功/失败）
+setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    });
+}, 3000);
 </script>
 {% endblock %}

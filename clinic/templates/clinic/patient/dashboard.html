@@ -3,93 +3,113 @@
 {% block title %}患者首页 - 门诊管理系统{% endblock %}
 
 {% block content %}
-<div class="row">
-    <!-- 个人信息卡片 -->
-    <div class="col-md-4 mb-4">
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">个人信息</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-borderless">
-                    <tr>
-                        <th width="30%">姓名：</th>
-                        <td>{{ request.patient.name }}</td>
-                    </tr>
-                    <tr>
-                        <th>性别：</th>
-                        <td>{{ request.patient.gender }}</td>
-                    </tr>
-                    <tr>
-                        <th>身份证号：</th>
-                        <td>{{ request.patient.id_card }}</td>
-                    </tr>
-                    <tr>
-                        <th>联系电话：</th>
-                        <td>{{ request.patient.mobile }}</td>
-                    </tr>
-                    <tr>
-                        <th>出生日期：</th>
-                        <td>{{ request.patient.birth_date }}</td>
-                    </tr>
-                </table>
-                <a href="{% url 'patient_profile' %}" class="btn btn-sm btn-outline-primary w-100">修改信息</a>
+<div class="container mt-4">
+    <div class="row">
+        <!-- 个人信息卡片 -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">个人信息</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="30%">姓名：</th>
+                            <td>{{ request.patient.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>性别：</th>
+                            <td>{{ request.patient.gender }}</td>
+                        </tr>
+                        <tr>
+                            <th>身份证号：</th>
+                            <td>{{ request.patient.id_card }}</td>
+                        </tr>
+                        <tr>
+                            <th>联系电话：</th>
+                            <td>{{ request.patient.mobile }}</td>
+                        </tr>
+                        <tr>
+                            <th>出生日期：</th>
+                            <td>{{ request.patient.birth_date }}</td>
+                        </tr>
+                    </table>
+                    <a href="{% url 'patient_profile' %}" class="btn btn-sm btn-outline-primary w-100">修改信息</a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 快捷功能 & 待办事项 -->
-    <div class="col-md-8 mb-4">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">快捷操作</h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <a href="{% url 'patient_appointment' %}" class="btn btn-primary w-100 py-3">
-                            <i class="bi bi-calendar-plus"></i> 预约挂号
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{% url 'patient_appointment_list' %}" class="btn btn-outline-primary w-100 py-3">
-                            <i class="bi bi-list-check"></i> 我的预约
-                        </a>
-                    </div>
+        <!-- 快捷功能 & 待就诊预约 -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">快捷操作</h5>
                 </div>
+                <div class="card-body">
+                    <!-- 快捷按钮 -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <a href="{% url 'patient_appointment' %}" class="btn btn-primary w-100 py-3">
+                                <i class="bi bi-calendar-plus"></i> 预约挂号
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'patient_appointment_list' %}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="bi bi-list-check"></i> 我的预约
+                            </a>
+                        </div>
+                    </div>
 
-                <!-- 待就诊预约 -->
-                <div class="mt-4">
-                    <h6 class="text-secondary">待就诊预约</h6>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>预约ID</th>
-                                    <th>科室</th>
-                                    <th>预计到达时间</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for appt in upcoming_appointments %}
-                                <tr>
-                                    <td>{{ appt.appt_id }}</td>
-                                    <td>{{ appt.dept.dept_name }}</td>
-                                    <td>{{ appt.arrival_time|date:"Y-m-d H:i" }}</td>
-                                    <td>
-                                        <a href="{% url 'patient_appointment_list' %}" class="btn btn-sm btn-outline-info">查看详情</a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <!-- 空状态处理 -->
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <!-- 待就诊预约列表 -->
+                    <div class="mt-2">
+                        <h6 class="text-secondary border-bottom pb-2">待就诊预约</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr class="table-light">
+                                        <th>预约ID</th>
+                                        <th>科室</th>
+                                        <th>预计到达时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appt in upcoming_appointments %}
+                                    <tr>
+                                        <td>{{ appt.appt_id }}</td>
+                                        <td>{{ appt.dept.dept_name }}</td>
+                                        <td>{{ appt.arrival_time|date:"Y-m-d H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'appointment_detail' appt.appt_id %}" 
+                                               class="btn btn-sm btn-outline-info">查看详情</a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">暂无待就诊预约</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 可选：添加提示消息自动消失功能 -->
+<script>
+    // 自动隐藏alert提示框
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 3000);
+</script>
 {% endblock %}

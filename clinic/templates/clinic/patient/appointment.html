@@ -10,50 +10,44 @@
                 <h5 class="mb-0">预约挂号</h5>
             </div>
             <div class="card-body">
-                <form method="post">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div class="alert alert-success">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" action="{% url 'patient_appointment' %}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">预约科室 <span class="text-danger">*</span></label>
-                        {{ form.dept }}  <!-- 直接使用字段，已自带 form-select 类 -->
+                        {{ form.dept }}
+                        {% if form.dept.errors %}
+                            <small class="text-danger">{{ form.dept.errors.0 }}</small>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <label class="form-label">预计到达时间 <span class="text-danger">*</span></label>
-                        {{ form.arrival_time }} 
-                        <div class="form-text">最多可预约未来7天的号源，且不能早于当前时间</div>
+                        <!-- 修复：强制指定datetime-local的格式，适配Django解析 -->
+                        {{ form.arrival_time }}
+                        <!-- 新增：手动设置value格式（如果表单回显） -->
+                        {% if form.arrival_time.value %}
+                            <script>
+                                // 将Python datetime转换为前端兼容的格式（YYYY-MM-DDTHH:MM）
+                                const dt = new Date("{{ form.arrival_time.value|date:'Y-m-d H:i' }}");
+                                const localDt = dt.toISOString().slice(0, 16);
+                                document.querySelector('input[type="datetime-local"]').value = localDt;
+                            </script>
+                        {% endif %}
+                        <div class="form-text">最多可预约未来7天的号源，且不能早于当前时间（格式：YYYY-MM-DD HH:MM）</div>
+                        {% if form.arrival_time.errors %}
+                            <small class="text-danger">{{ form.arrival_time.errors.0 }}</small>
+                        {% endif %}
                     </div>
                     <button type="submit" class="btn btn-primary w-100">提交预约</button>
                 </form>
-            </div>
-        </div>
-
-        <!-- 科室说明 -->
-        <div class="card mt-4">
-            <div class="card-header bg-light">
-                <h6 class="mb-0 text-secondary">科室说明</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>科室名称</th>
-                                <th>科室描述</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for dept in depts %}
-                            <tr>
-                                <td>{{ dept.dept_name }}</td>
-                                <td>{{ dept.dept_desc|default:"无" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="2" class="text-center text-muted">暂无科室信息</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </div>

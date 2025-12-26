@@ -80,11 +80,13 @@ class Schedule(models.Model):
     def __str__(self):
         return f"{self.doctor.name}-{self.schedule_date}-{self.time_slot}"
 
-# 预约模型
+# 预约模型（增加医生关联）
 class Appointment(models.Model):
     appt_id = models.AutoField(primary_key=True, verbose_name="预约ID")
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="患者")
     dept = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="预约科室")
+    # 移除多余的 doctor 字段 ↓
+    # doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, verbose_name="预约医生")
     appt_time = models.DateTimeField(auto_now_add=True, verbose_name="预约时间")
     arrival_time = models.DateTimeField(verbose_name="预计到达时间")
     status = models.IntegerField(choices=[(0, '未就诊'), (1, '已完成'), (2, '已取消')], default=0, verbose_name="预约状态")
@@ -92,10 +94,15 @@ class Appointment(models.Model):
     class Meta:
         verbose_name = "预约"
         verbose_name_plural = "预约"
-        unique_together = ('patient', 'arrival_time', 'dept')  # 避免重复预约
+        # 移除和doctor相关的唯一约束 ↓
+        # unique_together = ('patient', 'arrival_time', 'doctor')
+        unique_together = ('patient', 'arrival_time')  # 恢复原始约束
 
     def __str__(self):
-        return f"{self.patient.name}-{self.arrival_time.strftime('%Y-%m-%d %H:%M')}"
+        # 移除doctor相关显示 ↓
+        # return f"{self.patient.name}-{self.doctor.name}-{self.arrival_time.strftime('%Y-%m-%d %H:%M')}"
+        return f"{self.patient.name}-{self.dept.dept_name}-{self.arrival_time.strftime('%Y-%m-%d %H:%M')}"
+
 
 # 就诊记录模型
 class MedicalRecord(models.Model):

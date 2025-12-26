@@ -1,0 +1,81 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}预约详情 - 门诊管理系统{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <!-- 头部：预约ID + 返回按钮 -->
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">预约详情 #{{ appointment.appt_id }}</h5>
+                    <a href="{% url 'patient_appointment_list' %}" class="btn btn-sm btn-light">返回预约列表</a>
+                </div>
+
+                <!-- 详情内容 -->
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="30%">患者姓名</th>
+                                <td>{{ appointment.patient.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>预约科室</th>
+                                <td>{{ appointment.dept.dept_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>预约提交时间</th>
+                                <td>{{ appointment.appt_time|date:"Y-m-d H:i:s" }}</td>
+                            </tr>
+                            <tr>
+                                <th>预计到达时间</th>
+                                <td>{{ appointment.arrival_time|date:"Y-m-d H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>预约状态</th>
+                                <td>
+                                    {% if appointment.status == 0 %}
+                                        <span class="badge bg-warning">未就诊</span>
+                                    {% elif appointment.status == 1 %}
+                                        <span class="badge bg-success">已完成</span>
+                                    {% elif appointment.status == 2 %}
+                                        <span class="badge bg-danger">已取消</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- 操作按钮 -->
+                    <div class="mt-4 d-flex gap-2">
+                        {% if appointment.status == 0 %}
+                            <a href="{% url 'appointment_cancel' appointment.appt_id %}" 
+                               class="btn btn-danger"
+                               onclick="return confirm('确定要取消该预约吗？取消后无法恢复！')">
+                                取消预约
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'patient_dashboard' %}" class="btn btn-secondary">返回首页</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 提示消息自动消失
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 3000);
+</script>
+{% endblock %}

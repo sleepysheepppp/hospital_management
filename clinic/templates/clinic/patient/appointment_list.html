@@ -39,10 +39,11 @@
                         </td>
                         <td>
                             {% if appt.status == 0 %}
-                            <button class="btn btn-sm btn-danger" disabled>取消预约</button>
-                            <div class="form-text">请到医院前台取消</div>
+                            <!-- 修复：将 appt.id 改为 appt.appt_id -->
+                            <a href="{% url 'appointment_cancel' appt.appt_id %}" class="btn btn-sm btn-danger">取消预约</a>
+                            <a href="{% url 'appointment_detail' appt.appt_id %}" class="btn btn-sm btn-info">查看详情</a>
                             {% else %}
-                            <button class="btn btn-sm btn-outline-secondary" disabled>查看详情</button>
+                            <a href="{% url 'appointment_detail' appt.appt_id %}" class="btn btn-sm btn-outline-secondary">查看详情</a>
                             {% endif %}
                         </td>
                     </tr>
